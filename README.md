@@ -19,10 +19,6 @@ WiFi Manager for ESP32 using MicroPython. It might work in any other board since
 
 ```
 $ mpremote mip install github:ymkim92/micropython-wifi-manager
-
-or
- 
-$ mpremote mip install github:ymkim92/micropython-wifi-manager@branch-name
 ```
 
 ### Using mip directly on a WiFi capable board:
