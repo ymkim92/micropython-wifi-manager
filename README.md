@@ -3,7 +3,7 @@
 WiFi Manager for ESP32 using MicroPython. It might work in any other board since it only uses standard MicroPython libraries, but that's not tested.
 
 ![ESP32](https://img.shields.io/badge/ESP-32-000000.svg?longCache=true&style=flat&colorA=CC101F)
-![CI](https://github.com/ymkim92/micropython-wifi_manager/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/ymkim92/micropython-wifi-manager/actions/workflows/ci.yml/badge.svg)
 
 ## How It Works
 
@@ -15,13 +15,30 @@ WiFi Manager for ESP32 using MicroPython. It might work in any other board since
 
 ## Installation and Usage
  
-I use `justfile` to upload the scripts to a target device:
+### Using mip via mpremote:
+
+```
+$ mpremote mip install github:ymkim92/micropython-wifi-manager
+```
+
+### Using mip directly on a WiFi capable board:
+
+```
+>>> import mip
+>>> mip.install("github:ymkim92/micropython-wifi-manager")
+```
+
+### justfile
+
+You can use this during development.
+
+Upload the scripts to a target device:
 
 ```sh
 $ just upload
 ```
 
-You may want to use `mount` of mpremote for test or debugging:
+You may want to use `mount` of `mpremote` for test or debugging:
 ```sh
 $ just mount_and_run
 ```
