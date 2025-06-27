@@ -1,0 +1,3 @@
+[submodule "dependencies/async-fsm"]
+	path = dependencies/async-fsm
+	url = git@github.com:ymkim92/micropython-async-fsm.git
