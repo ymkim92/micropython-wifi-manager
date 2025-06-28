@@ -34,8 +34,9 @@ class WifiManager:
             if ssid in profiles:
                 password = profiles[ssid]
                 if self.wifi_connect(ssid, password):
-                    return
+                    return True
         print("Could not connect to any WiFi network. Starting the configuration portal...")
+        return False
         self.web_server()
 
     def disconnect(self):
