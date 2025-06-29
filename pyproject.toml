@@ -2,3 +2,11 @@
 line-length = 100
 # keep normal rules and add this extra one.
 lint.extend-select = ["E501"]
+target-version = "py310"
+lint.select = ["E", "F", "I"]  # E: pycodestyle, F: pyflakes, I: isort
+
+[tool.ruff.lint.isort]
+known-first-party = ["wifi_manager"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+combine-as-imports = true
+force-single-line = false
