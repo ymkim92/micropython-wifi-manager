@@ -13,12 +13,12 @@
 
 # Event
 
-| Event                 | Triggered From        | Description                            |
-| --------------------- | --------------------- | -------------------------------------- |
-| `ConnectRequestEvent` | External trigger      | system requests connection             |
-| `ConnectedEvent`      | After connect attempt | Connection was successful              |
-| `ConnectFailedEvent`  | After connect attempt | Connection attempt failed              |
-| `ConfigReceivedEvent` | In AP mode            | User submitted new Wi-Fi configuration |
+| Event                 | Triggered From            | Description                                  |
+| --------------------- | ------------------------- | -------------------------------------------- |
+| `ConnectRequestEvent` | External trigger          | Request to initiate a Wi-Fi connection       |
+| `ConfigReceivedEvent` | In AP (Access Point) mode | User submitted a new Wi-Fi configuration     |
+| `ServiceEvent`        | Periodic system call      | Performs routine checks and background tasks |
+
 
 # Action
 
@@ -34,33 +34,29 @@
 
 # Guard
 
-| Guard Name              | Description                                            |
-| ----------------------- | ------------------------------------------------------ |
-| `GuardHasSavedConfig()` | Returns true if valid saved Wi-Fi configuration exists |
+| Guard Name                 | Description                                            |
+| -------------------------- | ------------------------------------------------------ |
+| `GuardHasSavedConfig()`    | Returns true if valid saved Wi-Fi configuration exists |
+| `GuardConnectionSucceeded` | Returns true if connection is succeeded                |
+| `GuardConnectionTimeout`   | Returns true if connection is timed out                |
 
 
 # FSM Diagram
 
 ```plantuml
 @startuml
-state INIT : +entry/OnEntryInit()\n+exit/OnExitInit()
-state CONNECTING : +entry/OnEntryConnecting()\n+exit/OnExitConnecting()
-state AP_MODE : +entry/OnEntryAPMode()
-state RECONNECTING : +entry/OnEntryReconnecting()
-state CONNECTED : +entry/OnEntryConnected()
-state FAILED : +entry/OnEntryFailed()
 
 [*] --> INIT
 
 INIT --> CONNECTING : ConnectRequestEvent\n[GuardHasSavedConfig()]\n/ OnActionConnectToSaved()
 INIT --> AP_MODE : ConnectRequestEvent\n[!GuardHasSavedConfig()]\n/ OnActionStartAP()
 
-CONNECTING --> CONNECTED : ConnectedEvent\n/ OnActionNotifyConnected()
-CONNECTING --> AP_MODE : ConnectFailedEvent\n/ OnActionStartAP()
+CONNECTING --> CONNECTED : ServiceEvent\n[GuardConnectionSucceeded()]\n/ OnActionNotifyConnected()
+CONNECTING --> AP_MODE : ServiceEvent\n[GuardConnectionTimeout()]\n/ OnActionStartAP()
 
 AP_MODE --> RECONNECTING : ConfigReceivedEvent\n/ OnActionConnectWithNewConfig()
 
-RECONNECTING --> CONNECTED : ConnectedEvent\n/ OnActionNotifyConnected()
-RECONNECTING --> FAILED : ConnectFailedEvent\n/ OnActionLogError()
+RECONNECTING --> CONNECTED : ServiceEvent\n[GuardConnectionSucceeded()]\n/ OnActionNotifyConnected()
+RECONNECTING --> FAILED : ServiceEvent\n[GuardConnectionTimeout()]\n/ OnActionLogError()
 @enduml
 ```

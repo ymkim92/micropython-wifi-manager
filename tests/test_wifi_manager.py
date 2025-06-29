@@ -11,10 +11,9 @@ if "network" not in sys.modules:
 from unittest.mock import Mock, patch
 
 import pytest
-
-from wifi_manager.network_utils import write_credentials
-from wifi_manager.wifi_manager import WifiManager
 from logger.null_logger import NullLogger
+
+from wifi_manager.wifi_manager import WifiManager
 
 
 @pytest.fixture(autouse=True)

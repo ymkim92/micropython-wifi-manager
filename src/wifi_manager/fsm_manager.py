@@ -4,9 +4,6 @@ from async_fsm.fsm_async import AsyncFSM
 from logger.console_logger import ConsoleLogger, LogLevel
 
 from wifi_manager.fsm_message import (
-    EventConfigReceived,
-    EventConnected,
-    EventConnectFailed,
     EventConnectRequest,
 )
 from wifi_manager.fsm_state import (
@@ -21,7 +18,10 @@ from wifi_manager.wifi_manager import WifiManager
 
 
 class WifiFsmManager:
-    def __init__(self, wifi_manager: WifiManager):
+    def __init__(self, wifi_manager: WifiManager, logger: ConsoleLogger):
+        self.wifi_manager = wifi_manager
+        self.logger = logger
+
         # Define states
         init_state = Init("Init")
         connecting_state = Connecting("Connecting")
@@ -41,14 +41,40 @@ class WifiFsmManager:
         self.fsm.add_state(failed_state)
 
         # Define transitions
-        fsm.add_transition(init_state, EventConnectRequest, connecting_state)
-        fsm.add_transition(init_state, EventConnectRequest, connecting_state)
-        fsm.add_transition(connecting_state, EventConnected, connected_state)
-        fsm.add_transition(connecting_state, EventConnectFailed, failed_state)
-        fsm.add_transition(connected_state, EventConfigReceived, ap_mode_state)
-        fsm.add_transition(ap_mode_state, EventConnectRequest, reconnecting_state)
+        self.fsm.add_transition(
+            init_state,
+            EventConnectRequest,
+            connecting_state,
+            guard=self.guard_has_saved_config,
+            action=self.on_action_connect_to_saved,
+        )
+        self.fsm.add_transition(
+            init_state,
+            EventConnectRequest,
+            connecting_state,
+            guard=self.guard_has_saved_config,
+            action=self.on_action_start_ap_mode,
+        )
+        self.fsm.add_transition(init_state, EventConnectRequest, ap_mode_state)
 
-        ctx = {"logger": ConsoleLogger(LogLevel.INFO)}
-        fsm.start(ctx)
+        ctx = {}
+        self.fsm.start(ctx)
 
-        return fsm
+    # Guards
+    #
+    def guard_has_saved_config(self, ctx, message) -> bool:
+        """Guard to check if there are saved WiFi configurations."""
+        profiles = self.wifi_manager.read_credentials()
+        return profiles != {}
+
+    # Actions
+    #
+    def on_action_connect_to_saved(self, ctx, message):
+        """Action to connect to saved WiFi networks."""
+        # Implement connection logic here
+        # For example, call wifi_manager.connect_to_saved_networks()
+
+    def on_action_start_ap_mode(self, ctx, message):
+        """Action to start AP mode."""
+        # Implement AP mode logic here
+        # For example, call wifi_manager.start_ap_mode()

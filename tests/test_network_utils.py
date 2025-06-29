@@ -1,5 +1,4 @@
-from wifi_manager.network_utils import url_decode, write_credentials
-
+from wifi_manager.network_utils import url_decode
 
 # def test_write_and_read_credentials(tmp_path):
 #     file_path = tmp_path / "wifi.dat"

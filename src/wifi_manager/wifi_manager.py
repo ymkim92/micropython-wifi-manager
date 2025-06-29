@@ -1,9 +1,9 @@
 import time
 
 import network
+from logger.console_logger import ConsoleLogger
 
 from wifi_manager.webserver import WebServer
-from logger.console_logger import ConsoleLogger
 
 WIFI_CREDENTIALS = "wifi.dat"
 

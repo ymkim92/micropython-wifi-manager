@@ -1,8 +1,8 @@
 import utime
+from logger.console_logger import ConsoleLogger, LogLevel
 
 from wifi_manager.fsm_manager import create_fsm
 from wifi_manager.wifi_manager import WifiManager
-from logger.console_logger import ConsoleLogger, LogLevel
 
 
 # Example of usage

@@ -11,14 +11,9 @@ class EventConnectRequest(Message):
         super().__init__("ConnectRequest")
 
 
-class EventConnected(Message):
+class EventService(Message):
     def __init__(self):
-        super().__init__("Connected")
-
-
-class EventConnectFailed(Message):
-    def __init__(self):
-        super().__init__("ConnectFailed")
+        super().__init__("Service")
 
 
 class EventConfigReceived(Message):
