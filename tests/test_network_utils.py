@@ -1,4 +1,4 @@
-from wifi_manager.network_utils import write_credentials, read_credentials, url_decode
+from wifi_manager.network_utils import read_credentials, url_decode, write_credentials
 
 
 def test_write_and_read_credentials(tmp_path):

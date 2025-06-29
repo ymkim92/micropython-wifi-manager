@@ -1,8 +1,10 @@
 import re
 import socket
 import time
+
 import machine
-from .network_utils import url_decode, read_credentials, write_credentials
+
+from .network_utils import read_credentials, url_decode, write_credentials
 
 
 class WebServer:

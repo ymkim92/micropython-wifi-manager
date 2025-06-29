@@ -1,11 +1,16 @@
-import network
 import time
-from wifi_manager.network_utils import read_credentials
+
+import network
+
 from wifi_manager.webserver import WebServer
+from logger.console_logger import ConsoleLogger
+
+WIFI_CREDENTIALS = "wifi.dat"
 
 
 class WifiManager:
-    def __init__(self, ssid="WifiManager", password="wifimanager", reboot=True, debug=False):
+    def __init__(self, logger: ConsoleLogger, ssid="WifiManager", password="wifimanager"):
+        self.logger = logger
         self.wlan_sta = network.WLAN(network.STA_IF)
         self.wlan_sta.active(True)
         self.wlan_ap = network.WLAN(network.AP_IF)
@@ -20,22 +25,34 @@ class WifiManager:
             self.ap_password = password
 
         self.ap_authmode = 3
-        self.wifi_credentials = "wifi.dat"
         self.wlan_sta.disconnect()
-        self.reboot: bool = reboot
-        self.debug: bool = debug
 
-    def connect(self):
+    def read_credentials(self) -> dict:
+        """return {ssid, password} for WiFi access point into self.profiles"""
+        lines = []
+        profiles = {}
+        try:
+            with open(WIFI_CREDENTIALS) as file:
+                lines = file.readlines()
+        except Exception as error:
+            self.logger.error(error)
+        for line in lines:
+            ssid, password = line.strip().split(";")
+            profiles[ssid] = password
+
+        return profiles
+
+    def connect(self, profiles: dict) -> bool:
         if self.wlan_sta.isconnected():
-            return
-        profiles = read_credentials(self.wifi_credentials, self.debug)
+            return True
         for ssid, *_ in self.wlan_sta.scan():
             ssid = ssid.decode("utf-8")
             if ssid in profiles:
                 password = profiles[ssid]
                 if self.wifi_connect(ssid, password):
                     return True
-        print("Could not connect to any WiFi network. Starting the configuration portal...")
+        # assume it is close to the access point
+        self.logger.debug("Could not connect to any WiFi network.")
         return False
         self.web_server()
 
@@ -54,14 +71,17 @@ class WifiManager:
         self.wlan_sta.connect(ssid, password)
         for _ in range(100):
             if self.wlan_sta.isconnected():
-                print("\nConnected! Network information:", self.wlan_sta.ifconfig())
+                self.logger.info("\nConnected! Network information:", self.wlan_sta.ifconfig())
                 return True
             else:
-                print(".", end="")
                 time.sleep_ms(100)
-        print("\nConnection failed!")
+        self.logger.error("\nConnection failed!")
         self.wlan_sta.disconnect()
         return False
+
+    def guard_is_connected(self, ctx, msg):
+        """Guard to check if the WiFi is connected."""
+        return self.wlan_sta.isconnected()
 
     def web_server(self):
         server = WebServer(self)
