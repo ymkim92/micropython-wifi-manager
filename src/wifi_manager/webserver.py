@@ -4,7 +4,7 @@ import time
 
 import machine
 
-from .network_utils import read_credentials, url_decode, write_credentials
+from .network_utils import url_decode, write_credentials
 
 
 class WebServer:
@@ -172,7 +172,7 @@ class WebServer:
                 f"<p>Successfully connected to</p><h1>{ssid}</h1><p>IP address: "
                 f"{self.wlan_sta.ifconfig()[0]}</p>",
             )
-            profiles = read_credentials(self.wifi_credentials, self.debug)
+            profiles = self.manager.read_credentials()
             profiles[ssid] = password
             write_credentials(self.wifi_credentials, profiles)
             self._reboot_device()

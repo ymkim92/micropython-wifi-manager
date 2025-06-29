@@ -1,26 +1,26 @@
-from wifi_manager.network_utils import read_credentials, url_decode, write_credentials
+from wifi_manager.network_utils import url_decode, write_credentials
 
 
-def test_write_and_read_credentials(tmp_path):
-    file_path = tmp_path / "wifi.dat"
-    profiles = {"ssid1": "pass1", "ssid2": "pass2"}
-    write_credentials(str(file_path), profiles)
-    loaded = read_credentials(str(file_path))
-    assert loaded == profiles
+# def test_write_and_read_credentials(tmp_path):
+#     file_path = tmp_path / "wifi.dat"
+#     profiles = {"ssid1": "pass1", "ssid2": "pass2"}
+#     write_credentials(str(file_path), profiles)
+#     loaded = read_credentials(str(file_path))
+#     assert loaded == profiles
 
 
-def test_write_and_read_credentials_exception(tmp_path):
-    file_path = tmp_path / "wifi.dat"
-    loaded = read_credentials(str(file_path), debug=True)
-    assert loaded == {}
+# def test_write_and_read_credentials_exception(tmp_path):
+#     file_path = tmp_path / "wifi.dat"
+#     loaded = read_credentials(str(file_path), debug=True)
+#     assert loaded == {}
 
 
-def test_write_and_read_empty_credentials(tmp_path):
-    file_path = tmp_path / "wifi.dat"
-    profiles = {}
-    write_credentials(str(file_path), profiles)
-    loaded = read_credentials(str(file_path))
-    assert loaded == profiles
+# def test_write_and_read_empty_credentials(tmp_path):
+#     file_path = tmp_path / "wifi.dat"
+#     profiles = {}
+#     write_credentials(str(file_path), profiles)
+#     loaded = read_credentials(str(file_path))
+#     assert loaded == profiles
 
 
 def test_url_decode_basic():

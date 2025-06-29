@@ -2,7 +2,7 @@
 line-length = 100
 # keep normal rules and add this extra one.
 lint.extend-select = ["E501"]
-target-version = "py310"
+target-version = "py38"
 lint.select = ["E", "F", "I"]  # E: pycodestyle, F: pyflakes, I: isort
 
 [tool.ruff.lint.isort]
