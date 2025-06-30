@@ -60,13 +60,6 @@ class WifiFsmManager:
         ctx = {}
         self.fsm.start(ctx)
 
-    # Guards
-    #
-    def guard_has_saved_config(self, ctx, message) -> bool:
-        """Guard to check if there are saved WiFi configurations."""
-        profiles = self.wifi_manager.read_credentials()
-        return profiles != {}
-
     # Actions
     #
     def on_action_connect_to_saved(self, ctx, message):
