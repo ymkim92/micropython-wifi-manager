@@ -67,3 +67,19 @@ class WifiFsmManager:
         # self.fsm.add_transition(init_state, EventConnectRequest, ap_mode_state)
 
         self.fsm.start(self.ctx)
+
+    async def dispatch_event(self, event):
+        """Dispatch an event to the FSM.
+
+        Args:
+            event: The event to dispatch
+        """
+        await self.fsm.dispatch(self.ctx, event)
+
+    def get_current_state(self) -> str:
+        """Get the name of the current state.
+
+        Returns:
+            str: Name of current state
+        """
+        return self.fsm.current_state()
