@@ -17,6 +17,7 @@ from wifi_manager.fsm_state import (
 from wifi_manager.wifi_manager import WifiManager
 from wifi_manager.fsm_actions import WifiFsmActions
 from wifi_manager.fsm_guards import WifiFsmGuards
+from wifi_manager.fsm_context import WifiFsmContext
 
 
 class WifiFsmManager:
@@ -44,7 +45,10 @@ class WifiFsmManager:
         self.fsm.add_state(reconnecting_state)
         self.fsm.add_state(failed_state)
 
-        ctx = {"logger": self.logger, "wifi_manager": self.wifi_manager}
+        self.ctx = WifiFsmContext(
+            wifi_manager=self.wifi_manager,
+            logger=self.logger,
+        )
         # Define transitions
         self.fsm.add_transition(
             init_state,
@@ -62,4 +66,4 @@ class WifiFsmManager:
         # )
         # self.fsm.add_transition(init_state, EventConnectRequest, ap_mode_state)
 
-        self.fsm.start(ctx)
+        self.fsm.start(self.ctx)
