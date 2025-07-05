@@ -15,6 +15,8 @@ from wifi_manager.fsm_state import (
     Reconnecting,
 )
 from wifi_manager.wifi_manager import WifiManager
+from wifi_manager.fsm_actions import WifiFsmActions
+from wifi_manager.fsm_guards import WifiFsmGuards
 
 
 class WifiFsmManager:
@@ -31,6 +33,8 @@ class WifiFsmManager:
         failed_state = Failed("Failed")
 
         self.fsm = AsyncFSM(init_state)
+        fsm_guards = WifiFsmGuards()
+        fsm_actions = WifiFsmActions()
 
         # Add states to FSM
         self.fsm.add_state(init_state)
@@ -40,34 +44,22 @@ class WifiFsmManager:
         self.fsm.add_state(reconnecting_state)
         self.fsm.add_state(failed_state)
 
+        ctx = {"logger": self.logger, "wifi_manager": self.wifi_manager}
         # Define transitions
         self.fsm.add_transition(
             init_state,
             EventConnectRequest,
             connecting_state,
-            guard=self.guard_has_saved_config,
-            action=self.on_action_connect_to_saved,
+            guard=fsm_guards.guard_has_saved_config,
+            action=fsm_actions.on_action_connect_to_saved,
         )
-        self.fsm.add_transition(
-            init_state,
-            EventConnectRequest,
-            connecting_state,
-            guard=self.guard_has_saved_config,
-            action=self.on_action_start_ap_mode,
-        )
-        self.fsm.add_transition(init_state, EventConnectRequest, ap_mode_state)
+        # self.fsm.add_transition(
+        #     init_state,
+        #     EventConnectRequest,
+        #     connecting_state,
+        #     guard=lambda: fsm_guards.guard_has_saved_config(),
+        #     action=fsm_actions.on_action_start_ap_mode,
+        # )
+        # self.fsm.add_transition(init_state, EventConnectRequest, ap_mode_state)
 
-        ctx = {}
         self.fsm.start(ctx)
-
-    # Actions
-    #
-    def on_action_connect_to_saved(self, ctx, message):
-        """Action to connect to saved WiFi networks."""
-        # Implement connection logic here
-        # For example, call wifi_manager.connect_to_saved_networks()
-
-    def on_action_start_ap_mode(self, ctx, message):
-        """Action to start AP mode."""
-        # Implement AP mode logic here
-        # For example, call wifi_manager.start_ap_mode()
