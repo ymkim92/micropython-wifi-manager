@@ -36,6 +36,6 @@ async def test_fsm_transition_init_to_connecting():
     # Dispatch the event
     await fsm_manager.dispatch_event(EventConnectRequest())
 
-    # assert fsm_manager.get_current_state() == "Connecting"
+    assert fsm_manager.get_current_state() == "Connecting"
     # mock_guards.guard_has_saved_config.assert_called_once()
     # mock_actions.on_action_connect_to_saved.assert_awaited_once()
