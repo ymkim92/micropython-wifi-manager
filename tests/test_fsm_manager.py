@@ -30,15 +30,12 @@ async def test_fsm_transition_init_to_connecting():
     fsm_manager.fsm_guards = mock_guards
     fsm_manager.fsm_actions = mock_actions
 
+    await fsm_manager.initialize()
+
     assert fsm_manager.get_current_state() == "Init"
     # Dispatch the event
     await fsm_manager.dispatch_event(EventConnectRequest())
 
-    # Assert the FSM transitioned to the "Connecting" state
     # assert fsm_manager.get_current_state() == "Connecting"
-
-    # # Assert the guard was called
     # mock_guards.guard_has_saved_config.assert_called_once()
-
-    # # Assert the action was executed
     # mock_actions.on_action_connect_to_saved.assert_awaited_once()

@@ -26,24 +26,24 @@ class WifiFsmManager:
         self.logger = logger
 
         # Define states
-        init_state = Init("Init")
-        connecting_state = Connecting("Connecting")
-        connected_state = Connected("Connected")
-        ap_mode_state = ApMode("ApMode")
-        reconnecting_state = Reconnecting("Reconnecting")
-        failed_state = Failed("Failed")
+        self.init_state = Init("Init")
+        self.connecting_state = Connecting("Connecting")
+        self.connected_state = Connected("Connected")
+        self.ap_mode_state = ApMode("ApMode")
+        self.reconnecting_state = Reconnecting("Reconnecting")
+        self.failed_state = Failed("Failed")
 
-        self.fsm = AsyncFSM(init_state)
-        fsm_guards = WifiFsmGuards()
-        fsm_actions = WifiFsmActions()
+        self.fsm = AsyncFSM(self.init_state)
+        self.fsm_guards = WifiFsmGuards()
+        self.fsm_actions = WifiFsmActions()
 
         # Add states to FSM
-        self.fsm.add_state(init_state)
-        self.fsm.add_state(connecting_state)
-        self.fsm.add_state(connected_state)
-        self.fsm.add_state(ap_mode_state)
-        self.fsm.add_state(reconnecting_state)
-        self.fsm.add_state(failed_state)
+        self.fsm.add_state(self.init_state)
+        self.fsm.add_state(self.connecting_state)
+        self.fsm.add_state(self.connected_state)
+        self.fsm.add_state(self.ap_mode_state)
+        self.fsm.add_state(self.reconnecting_state)
+        self.fsm.add_state(self.failed_state)
 
         self.ctx = WifiFsmContext(
             wifi_manager=self.wifi_manager,
@@ -51,11 +51,11 @@ class WifiFsmManager:
         )
         # Define transitions
         self.fsm.add_transition(
-            init_state,
+            self.init_state,
             EventConnectRequest,
-            connecting_state,
-            guard=fsm_guards.guard_has_saved_config,
-            action=fsm_actions.on_action_connect_to_saved,
+            self.connecting_state,
+            guard=self.fsm_guards.guard_has_saved_config,
+            action=self.fsm_actions.on_action_connect_to_saved,
         )
         # self.fsm.add_transition(
         #     init_state,
@@ -66,7 +66,8 @@ class WifiFsmManager:
         # )
         # self.fsm.add_transition(init_state, EventConnectRequest, ap_mode_state)
 
-        self.fsm.start(self.ctx)
+    async def initialize(self):
+        await self.fsm.start(self.ctx)
 
     async def dispatch_event(self, event):
         """Dispatch an event to the FSM.
