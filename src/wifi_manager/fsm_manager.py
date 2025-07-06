@@ -21,9 +21,16 @@ from wifi_manager.fsm_context import WifiFsmContext
 
 
 class WifiFsmManager:
-    def __init__(self, wifi_manager: WifiManager, logger: ConsoleLogger):
-        self.wifi_manager = wifi_manager
-        self.logger = logger
+    def __init__(
+        self,
+        wifi_manager: WifiManager,
+        logger: ConsoleLogger,
+        fsm_guards: WifiFsmGuards = None,
+        fsm_actions: WifiFsmActions = None,
+    ):
+        """Initialize the FSM Manager"""
+        self.wifi_manager = wifi_manager or WifiManager()
+        self.logger = logger or ConsoleLogger(LogLevel.INFO)
 
         # Define states
         self.init_state = Init("Init")
@@ -34,8 +41,8 @@ class WifiFsmManager:
         self.failed_state = Failed("Failed")
 
         self.fsm = AsyncFSM(self.init_state)
-        self.fsm_guards = WifiFsmGuards()
-        self.fsm_actions = WifiFsmActions()
+        self.fsm_guards = fsm_guards or WifiFsmGuards()
+        self.fsm_actions = fsm_actions or WifiFsmActions()
 
         # Add states to FSM
         self.fsm.add_state(self.init_state)

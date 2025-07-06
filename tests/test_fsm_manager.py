@@ -24,7 +24,7 @@ async def test_fsm_transition_init_to_connecting():
     mock_actions.on_action_connect_to_saved = AsyncMock()
 
     # Initialize FSM Manager
-    fsm_manager = WifiFsmManager(mock_wifi_manager, mock_logger)
+    fsm_manager = WifiFsmManager(mock_wifi_manager, mock_logger, mock_guards, mock_actions)
 
     # Replace guards and actions with mocks
     fsm_manager.fsm_guards = mock_guards
@@ -37,5 +37,5 @@ async def test_fsm_transition_init_to_connecting():
     await fsm_manager.dispatch_event(EventConnectRequest())
 
     assert fsm_manager.get_current_state() == "Connecting"
-    # mock_guards.guard_has_saved_config.assert_called_once()
-    # mock_actions.on_action_connect_to_saved.assert_awaited_once()
+    mock_guards.guard_has_saved_config.assert_called_once()
+    mock_actions.on_action_connect_to_saved.assert_awaited_once()
