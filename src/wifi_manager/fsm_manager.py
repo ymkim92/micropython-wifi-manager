@@ -58,9 +58,9 @@ class WifiFsmManager:
         )
         # Define transitions
         self.fsm.add_transition(
-            self.init_state,
+            self.init_state.name,
             EventConnectRequest,
-            self.connecting_state,
+            self.connecting_state.name,
             guard=self.fsm_guards.guard_has_saved_config,
             action=self.fsm_actions.on_action_connect_to_saved,
         )
@@ -84,10 +84,10 @@ class WifiFsmManager:
         """
         await self.fsm.dispatch(self.ctx, event)
 
-    def get_current_state(self) -> str:
+    def get_current_state_name(self) -> str:
         """Get the name of the current state.
 
         Returns:
             str: Name of current state
         """
-        return self.fsm.current_state()
+        return self.fsm.current_state_name()
