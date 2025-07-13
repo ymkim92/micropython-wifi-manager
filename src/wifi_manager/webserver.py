@@ -3,7 +3,13 @@ from __future__ import annotations
 
 import re
 
-from .network_utils import parse_request, read_credentials, url_decode, write_credentials
+from wifi_manager.network_utils import (
+    build_root_form,
+    parse_request,
+    read_credentials,
+    url_decode,
+    write_credentials,
+)
 
 
 class WebServer:
@@ -119,28 +125,11 @@ class WebServer:
         )
         client.close()
 
-    def handle_root(self, client):
+    def handle_root(self, client, scan_results: list[bytes]):
         """Handle the root URL."""
-        ssid_options = "".join(
-            f"""
-            <p><input type="radio" name="ssid" value="{ssid.decode("utf-8")}" 
-            id="{ssid.decode("utf-8")}">
-            <label for="{ssid.decode("utf-8")}">&nbsp;{ssid.decode("utf-8")}</label></p>
-            """
-            for ssid, *_ in self.wlan_sta.scan()
-        )
-        self.send_response(
-            client,
-            f"""
-            <h1>WiFi Manager</h1>
-            <form action="/configure" method="post" accept-charset="utf-8">
-                {ssid_options}
-                <p><label for="password">Password:&nbsp;</label>
-                <input type="password" id="password" name="password"></p>
-                <p><input type="submit" value="Connect"></p>
-            </form>
-            """,
-        )
+        ssids = [net.decode() for net in scan_results]
+        html = build_root_form(ssids)
+        self.send_response(client, html)
 
     def handle_configure(self, client, request):
         """Handle the configure URL."""

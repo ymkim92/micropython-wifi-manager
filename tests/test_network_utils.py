@@ -1,4 +1,4 @@
-from wifi_manager.network_utils import parse_request, url_decode
+from wifi_manager.network_utils import build_root_form, parse_request, url_decode
 
 # def test_write_and_read_credentials(tmp_path):
 #     file_path = tmp_path / "wifi.dat"
@@ -55,3 +55,31 @@ def test_parse_request_invalid():
     request = b"BAD REQUEST"
     url = parse_request(request)
     assert url is None
+
+
+def test_build_root_form_generates_expected_html():
+    ssid_list = ["HomeWiFi", "GuestNetwork", "IoT"]
+    html = build_root_form(ssid_list)
+
+    # Check that each SSID is correctly used in input and label
+    for ssid in ssid_list:
+        assert f"<input type='radio' name='ssid' value='{ssid}' id='{ssid}' />" in html
+        assert f"<label for='{ssid}'>{ssid}</label>" in html
+
+    # Check static parts of the form
+    assert '<form action="/configure" method="post"' in html
+    assert 'type="password"' in html
+    assert 'name="password"' in html
+    assert 'type="submit"' in html
+    assert 'value="Connect"' in html
+
+
+def test_build_root_form_empty_list():
+    html = build_root_form([])
+
+    # No radio inputs should be present
+    assert "<input type='radio'" not in html
+
+    # Form should still include password and submit fields
+    assert 'type="password"' in html
+    assert 'type="submit"' in html

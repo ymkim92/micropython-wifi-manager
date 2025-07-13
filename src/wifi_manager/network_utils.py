@@ -51,3 +51,24 @@ def parse_request(request_bytes: bytes) -> str | None:
     if not match:
         return None
     return match.group(1).decode("utf-8").rstrip("/")
+
+
+def build_root_form(ssid_list: list[str]) -> str:
+    if not ssid_list:
+        options = "<p>No WiFi networks found. Please refresh or try again later.</p>"
+    else:
+        options = "\n".join(
+            f"<p><input type='radio' name='ssid' value='{ssid}' id='{ssid}' />"
+            f"<label for='{ssid}'>{ssid}</label></p>"
+            for ssid in ssid_list
+        )
+    html = f"""
+            <h1>WiFi Manager</h1>
+            <form action="/configure" method="post" accept-charset="utf-8">
+                {options}
+                <p><label for="password">Password:&nbsp;</label>
+                <input type="password" id="password" name="password"></p>
+                <p><input type="submit" value="Connect"></p>
+            </form>
+            """
+    return html
