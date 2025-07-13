@@ -14,25 +14,47 @@ from wifi_manager.wifi_manager import WifiManager
 
 
 @pytest.fixture
-def mock_manager(spec=WifiManager):
+def mock_wifi_manager():
     """Create a mock WifiManager for testing."""
-    from wifi_manager.wifi_manager import WifiManager
 
-    mock = Mock()
-    mock.wlan_ap = Mock()
-    mock.wlan_sta = Mock()
+    mock_wifi_manager = Mock(spec=WifiManager)
+    mock_wifi_manager.wlan_ap = Mock()
+    mock_wifi_manager.wlan_sta = Mock()
 
-    mock.wlan_ap.ifconfig.return_value = ["192.168.4.1"]
-    mock.wlan_sta.isconnected.return_value = False
-    mock.wlan_sta.scan.return_value = [(b"TestSSID",)]
+    mock_wifi_manager.wlan_ap.ifconfig.return_value = ["192.168.4.1"]
+    mock_wifi_manager.wlan_sta.isconnected.return_value = False
+    mock_wifi_manager.wlan_sta.scan.return_value = [(b"TestSSID",)]
 
-    mock.ap_ssid = "MyAP"
-    mock.ap_password = "password123"
-    mock.ap_authmode = 3
-    mock.reboot = False
-    mock.wifi_credentials = "wifi.dat"
-    mock.wifi_connect.return_value = True
-    return mock
+    mock_wifi_manager.ap_ssid = "MyAP"
+    mock_wifi_manager.ap_password = "password123"
+    mock_wifi_manager.ap_authmode = 3
+    mock_wifi_manager.reboot = False
+    mock_wifi_manager.wifi_credentials = "wifi.dat"
+    mock_wifi_manager.wifi_connect.return_value = True
+
+    return mock_wifi_manager
+
+
+@pytest.fixture
+def mock_web_server(mock_wifi_manager):
+    """Create a web server for testing."""
+
+    mock_logger = Mock()
+    mock_sleep = Mock()
+    mock_reset = Mock()
+    web_server = WebServer(mock_wifi_manager, mock_logger, mock_sleep, mock_reset)
+    return web_server
+
+
+def test_run_no_connection_then_ok(mock_web_server):
+    # 1st loop: not connected → handle client; 2nd loop: connected → reboot
+    mock_web_server.manager.wlan_sta.isconnected.side_effect = [False, True]
+
+    server_socket = Mock()
+    fake_client = object()
+    server_socket.accept.return_value = (fake_client, None)
+
+    mock_web_server.run()
 
 
 # TODO remove
@@ -55,17 +77,6 @@ def test_reboot_device_true(mock_manager):
 #     server.reboot = False
 #     server._reboot_device()
 #     mock_sleep.assert_not_called()
-
-
-def test_run_no_connection_then_ok(mock_manager):
-    mock_logger = Mock()
-    mock_sleep = Mock()
-    mock_reset = Mock()
-    server = WebServer(mock_manager, mock_logger, mock_sleep, mock_reset)
-    client = Mock()
-    mock_manager.wlan_sta.isconnected.side_effect = [False, True]
-
-    server.run()
 
 
 # TODO remove

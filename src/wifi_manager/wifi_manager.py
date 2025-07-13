@@ -1,3 +1,4 @@
+import socket
 import time
 
 import machine
@@ -71,4 +72,13 @@ class WifiManager:
 
     def web_server(self):
         server = WebServer(self, self.logger, time.sleep, machine.reset, debug=False)
-        server.run()
+        server_socket = self._create_server_socket()
+        server.run(server_socket)
+
+    def _create_server_socket(self):
+        """Create and configure the server socket."""
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server_socket.bind(("", 80))
+        server_socket.listen(1)
+        return server_socket

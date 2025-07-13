@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import re
-import socket
 
 from .network_utils import read_credentials, url_decode, write_credentials
 
@@ -40,14 +39,6 @@ class WebServer:
             self.logger.info("The device will reboot in 5 seconds.")
             self.sleep_fn(5)
             self.reset_fn()
-
-    def _create_server_socket(self):
-        """Create and configure the server socket."""
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server_socket.bind(("", 80))
-        server_socket.listen(1)
-        return server_socket
 
     def _parse_request(self, request):
         """Parse the HTTP request and extract the URL."""
@@ -94,8 +85,11 @@ class WebServer:
         finally:
             client.close()
 
-    def run(self):
+    def run(self, server_socket):
         """Start the web server."""
+        if server_socket is None:
+            self.logger.error("Server socket is not created. Cannot run the web server.")
+            return
         self.wlan_ap.active(True)
         self.wlan_ap.config(
             essid=self.ap_ssid, password=self.ap_password, authmode=self.ap_authmode
@@ -104,7 +98,6 @@ class WebServer:
         output += f"and access the captive portal at {self.wlan_ap.ifconfig()[0]}"
         self.logger.info(output)
 
-        server_socket = self._create_server_socket()
         while True:
             if self.wlan_sta.isconnected():
                 self.wlan_ap.active(False)

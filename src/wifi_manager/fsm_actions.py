@@ -1,7 +1,6 @@
 """FSM actions for WiFi Manager."""
 
 
-
 class WifiFsmActions:
     async def on_action_connect_to_saved(self, ctx, message):
         """Action to connect to saved WiFi networks."""
