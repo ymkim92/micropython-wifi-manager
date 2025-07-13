@@ -1,4 +1,4 @@
-from wifi_manager.network_utils import url_decode
+from wifi_manager.network_utils import parse_request, url_decode
 
 # def test_write_and_read_credentials(tmp_path):
 #     file_path = tmp_path / "wifi.dat"
@@ -43,3 +43,15 @@ def test_url_decode_invalid_percent():
     # Should not raise, just return as-is
     assert url_decode("abc%zz") == b"abc%zz"
     assert url_decode(b"abc%zz") == b"abc%zz"
+
+
+def test_parse_request_valid():
+    request = b"GET /configure HTTP/1.1\r\n\r\n"
+    url = parse_request(request)
+    assert url == "configure"
+
+
+def test_parse_request_invalid():
+    request = b"BAD REQUEST"
+    url = parse_request(request)
+    assert url is None

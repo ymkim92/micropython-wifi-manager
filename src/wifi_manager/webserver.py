@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import re
 
-from .network_utils import read_credentials, url_decode, write_credentials
+from .network_utils import parse_request, read_credentials, url_decode, write_credentials
 
 
 class WebServer:
@@ -40,21 +40,6 @@ class WebServer:
             self.sleep_fn(5)
             self.reset_fn()
 
-    def _parse_request(self, request):
-        """Parse the HTTP request and extract the URL."""
-        try:
-            url = (
-                re.search(b"(?:GET|POST) /(.*?)(?:\\?.*?)? HTTP", request)
-                .group(1)
-                .decode("utf-8")
-                .rstrip("/")
-            )
-            return url
-        except Exception as error:
-            if self.debug:
-                self.logger.info(f"Error parsing request: {error}")
-            return None
-
     def _handle_client(self, client):
         """Handle a single client connection."""
         try:
@@ -71,7 +56,7 @@ class WebServer:
             if self.debug:
                 self.logger.debug(f"Received request: {request.decode('utf-8', errors='ignore')}")
 
-            url = self._parse_request(request)
+            url = parse_request(request)
             if url == "":
                 self.handle_root(client)
             elif url == "configure":

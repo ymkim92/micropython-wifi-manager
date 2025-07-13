@@ -1,3 +1,6 @@
+import re
+
+
 def write_credentials(wifi_credentials, profiles):
     lines = []
     for ssid, password in profiles.items():
@@ -40,3 +43,11 @@ def url_decode(data):
         result.append(data[i])
         i += 1
     return bytes(result)
+
+
+def parse_request(request_bytes: bytes) -> str | None:
+    """Return the URL path from raw HTTP GET/POST bytes, or None on failure."""
+    match = re.search(b"(?:GET|POST) /(.*?)(?:\\?.*?)? HTTP", request_bytes)
+    if not match:
+        return None
+    return match.group(1).decode("utf-8").rstrip("/")

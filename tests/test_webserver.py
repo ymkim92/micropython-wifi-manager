@@ -97,22 +97,6 @@ def test_reboot_device_true(mock_manager):
 #     server._handle_client.assert_called_once_with(client)
 
 
-def test_parse_request_valid(mock_manager):
-    server = WebServer(mock_manager)
-    request = b"GET /configure HTTP/1.1\r\n\r\n"
-    url = server._parse_request(request)
-    assert url == "configure"
-
-
-def test_parse_request_invalid(mock_manager, capsys):
-    server = WebServer(mock_manager, debug=True)
-    request = b"BAD REQUEST"
-    url = server._parse_request(request)
-    captured = capsys.readouterr()
-    assert url is None
-    assert "Error parsing request" in captured.out
-
-
 def test_send_header(mock_manager):
     server = WebServer(mock_manager)
     client = Mock()
