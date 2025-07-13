@@ -1,12 +1,13 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock
-from wifi_manager.fsm_manager import WifiFsmManager
-from wifi_manager.fsm_message import EventConnectRequest
-from wifi_manager.fsm_state import Init, Connecting
+
+import pytest
+from logger.console_logger import ConsoleLogger
+
 from wifi_manager.fsm_actions import WifiFsmActions
 from wifi_manager.fsm_guards import WifiFsmGuards
+from wifi_manager.fsm_manager import WifiFsmManager
+from wifi_manager.fsm_message import EventConnectRequest
 from wifi_manager.wifi_manager import WifiManager
-from logger.console_logger import ConsoleLogger
 
 
 @pytest.mark.asyncio

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Dict, Any
+from typing import Any, Dict
+
 from logger.console_logger import ConsoleLogger
 
 # from wifi_manager.wifi_manager import WifiManager

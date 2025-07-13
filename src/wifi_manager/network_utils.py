@@ -6,6 +6,23 @@ def write_credentials(wifi_credentials, profiles):
         file.write("".join(lines))
 
 
+def read_credentials(wifi_credentials, logger) -> dict:
+    """return {ssid, password} for WiFi access point"""
+    lines = []
+    profiles = {}
+    try:
+        with open(wifi_credentials, "r") as file:
+            lines = file.readlines()
+    except Exception as error:
+        if logger:
+            logger.error(error)
+    for line in lines:
+        ssid, password = line.strip().split(";")
+        profiles[ssid] = password
+
+    return profiles
+
+
 def url_decode(data):
     if isinstance(data, str):
         data = data.encode("utf-8")

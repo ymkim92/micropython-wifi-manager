@@ -1,15 +1,23 @@
+# In Python 3.7+, this works:
+from __future__ import annotations
+
 import re
 import socket
-import time
 
-import machine
-
-from .network_utils import url_decode, write_credentials
+from .network_utils import read_credentials, url_decode, write_credentials
 
 
 class WebServer:
-    def __init__(self, manager, sleep_fn=time.sleep, reset_fn=machine.reset, debug=False):
+    def __init__(
+        self,
+        manager: "WifiManager",  # type: ignore
+        logger: "ConsoleLogger",  # type: ignore
+        sleep_fn: callable,
+        reset_fn: callable,
+        debug=False,
+    ):
         self.manager = manager
+        self.logger = logger
         self.wlan_ap = manager.wlan_ap
         self.wlan_sta = manager.wlan_sta
         self.ap_ssid = manager.ap_ssid
@@ -18,13 +26,18 @@ class WebServer:
         self.reboot = manager.reboot
         self.debug = debug
         self.wifi_credentials = manager.wifi_credentials
-        self.sleep_fn = sleep_fn  # Dependency injection for time.sleep
-        self.reset_fn = reset_fn  # Dependency injection for machine.reset
+        self.sleep_fn = sleep_fn
+        self.reset_fn = reset_fn
+
+        assert self.manager is not None, "Manager must be provided"
+        assert self.logger is not None, "Logger must be provided"
+        assert self.sleep_fn is not None, "Sleep function must be provided"
+        assert self.reset_fn is not None, "Reset function must be provided"
 
     def _reboot_device(self):
         """Reboot the device after a delay."""
         if self.reboot:
-            print("The device will reboot in 5 seconds.")
+            self.logger.info("The device will reboot in 5 seconds.")
             self.sleep_fn(5)
             self.reset_fn()
 
@@ -48,7 +61,7 @@ class WebServer:
             return url
         except Exception as error:
             if self.debug:
-                print(f"Error parsing request: {error}")
+                self.logger.info(f"Error parsing request: {error}")
             return None
 
     def _handle_client(self, client):
@@ -65,19 +78,19 @@ class WebServer:
                     break
 
             if self.debug:
-                print(f"Request received: {request}")
+                self.logger.debug(f"Received request: {request.decode('utf-8', errors='ignore')}")
 
             url = self._parse_request(request)
             if url == "":
                 self.handle_root(client)
             elif url == "configure":
-                print(f"##########request {request}")
+                self.logger.debug(f"Received request: {request.decode('utf-8', errors='ignore')}")
                 self.handle_configure(client, request)
             else:
                 self.handle_not_found(client)
         except Exception as error:
             if self.debug:
-                print(f"Error handling client: {error}")
+                self.logger.debug(f"Error handling client: {error}")
         finally:
             client.close()
 
@@ -87,10 +100,9 @@ class WebServer:
         self.wlan_ap.config(
             essid=self.ap_ssid, password=self.ap_password, authmode=self.ap_authmode
         )
-        print(
-            f"Connect to {self.ap_ssid} with the password {self.ap_password} "
-            f"and access the captive portal at {self.wlan_ap.ifconfig()[0]}"
-        )
+        output = f"Connect to {self.ap_ssid} with the password {self.ap_password} "
+        output += f"and access the captive portal at {self.wlan_ap.ifconfig()[0]}"
+        self.logger.info(output)
 
         server_socket = self._create_server_socket()
         while True:
@@ -172,7 +184,7 @@ class WebServer:
                 f"<p>Successfully connected to</p><h1>{ssid}</h1><p>IP address: "
                 f"{self.wlan_sta.ifconfig()[0]}</p>",
             )
-            profiles = self.manager.read_credentials()
+            profiles = read_credentials(self.wifi_credentials, self.logger)
             profiles[ssid] = password
             write_credentials(self.wifi_credentials, profiles)
             self._reboot_device()

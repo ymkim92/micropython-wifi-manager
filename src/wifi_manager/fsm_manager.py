@@ -3,6 +3,9 @@
 from async_fsm.fsm_async import AsyncFSM
 from logger.console_logger import ConsoleLogger, LogLevel
 
+from wifi_manager.fsm_actions import WifiFsmActions
+from wifi_manager.fsm_context import WifiFsmContext
+from wifi_manager.fsm_guards import WifiFsmGuards
 from wifi_manager.fsm_message import (
     EventConnectRequest,
 )
@@ -15,9 +18,6 @@ from wifi_manager.fsm_state import (
     Reconnecting,
 )
 from wifi_manager.wifi_manager import WifiManager
-from wifi_manager.fsm_actions import WifiFsmActions
-from wifi_manager.fsm_guards import WifiFsmGuards
-from wifi_manager.fsm_context import WifiFsmContext
 
 
 class WifiFsmManager:
@@ -64,13 +64,13 @@ class WifiFsmManager:
             guard=self.fsm_guards.guard_has_saved_config,
             action=self.fsm_actions.on_action_connect_to_saved,
         )
-        # self.fsm.add_transition(
-        #     init_state,
-        #     EventConnectRequest,
-        #     connecting_state,
-        #     guard=lambda: fsm_guards.guard_has_saved_config(),
-        #     action=fsm_actions.on_action_start_ap_mode,
-        # )
+        self.fsm.add_transition(
+            self.init_state.name,
+            EventConnectRequest,
+            self.connecting_state.name,
+            guard=self.fsm_guards.guard_has_saved_config,
+            action=self.fsm_actions.on_action_connect_to_saved,
+        )
         # self.fsm.add_transition(init_state, EventConnectRequest, ap_mode_state)
 
     async def initialize(self):

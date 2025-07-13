@@ -1,5 +1,6 @@
 import time
 
+import machine
 import network
 from logger.console_logger import ConsoleLogger
 
@@ -26,21 +27,6 @@ class WifiManager:
 
         self.ap_authmode = 3
         self.wlan_sta.disconnect()
-
-    def read_credentials(self) -> dict:
-        """return {ssid, password} for WiFi access point into self.profiles"""
-        lines = []
-        profiles = {}
-        try:
-            with open(WIFI_CREDENTIALS) as file:
-                lines = file.readlines()
-        except Exception as error:
-            self.logger.error(error)
-        for line in lines:
-            ssid, password = line.strip().split(";")
-            profiles[ssid] = password
-
-        return profiles
 
     def connect(self, profiles: dict) -> bool:
         if self.wlan_sta.isconnected():
@@ -84,5 +70,5 @@ class WifiManager:
         return self.wlan_sta.isconnected()
 
     def web_server(self):
-        server = WebServer(self)
+        server = WebServer(self, self.logger, time.sleep, machine.reset, debug=False)
         server.run()

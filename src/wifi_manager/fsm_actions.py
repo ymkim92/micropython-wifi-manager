@@ -1,9 +1,5 @@
 """FSM actions for WiFi Manager."""
 
-from typing import Any, Dict
-from wifi_manager.wifi_manager import WifiManager
-from logger.console_logger import ConsoleLogger, LogLevel
-from wifi_manager.fsm_utils import get_required
 
 
 class WifiFsmActions:

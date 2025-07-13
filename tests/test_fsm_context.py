@@ -1,5 +1,6 @@
-from wifi_manager.fsm_context import WifiFsmContext
 from unittest.mock import MagicMock
+
+from wifi_manager.fsm_context import WifiFsmContext
 
 
 def test_fsm_context_creation():
