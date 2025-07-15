@@ -72,3 +72,11 @@ def build_root_form(ssid_list: list[str]) -> str:
             </form>
             """
     return html
+
+
+def parse_configure_params(request_bytes: bytes) -> tuple[str, str] | None:
+    data = url_decode(request_bytes)
+    match = re.search(b"ssid=([^&]*)&password=(.*)", data)
+    if not match:
+        return None
+    return match.group(1).decode(), match.group(2).decode()

@@ -7,8 +7,8 @@ from wifi_manager.network_utils import (
     build_root_form,
     parse_request,
     read_credentials,
-    url_decode,
     write_credentials,
+    parse_configure_params,
 )
 
 
@@ -28,7 +28,6 @@ class WebServer:
         self.ap_ssid = manager.ap_ssid
         self.ap_password = manager.ap_password
         self.ap_authmode = manager.ap_authmode
-        self.reboot = manager.reboot
         self.debug = debug
         self.wifi_credentials = manager.wifi_credentials
         self.sleep_fn = sleep_fn
@@ -41,10 +40,9 @@ class WebServer:
 
     def _reboot_device(self):
         """Reboot the device after a delay."""
-        if self.reboot:
-            self.logger.info("The device will reboot in 5 seconds.")
-            self.sleep_fn(5)
-            self.reset_fn()
+        self.logger.info("The device will reboot in 5 seconds.")
+        self.sleep_fn(5)
+        self.reset_fn()
 
     def _handle_client(self, client):
         """Handle a single client connection."""
@@ -131,16 +129,13 @@ class WebServer:
         html = build_root_form(ssids)
         self.send_response(client, html)
 
-    def handle_configure(self, client, request):
+    def handle_configure(self, client, request: bytes) -> None:
         """Handle the configure URL."""
-        match = re.search(b"ssid=([^&]*)&password=(.*)", url_decode(request))
-        if not match:
+        params = parse_configure_params(request)
+        if not params:
             self.send_response(client, "<p>Parameters not found!</p>", 400)
             return
-
-        ssid = match.group(1).decode("utf-8")
-        password = match.group(2).decode("utf-8")
-
+        ssid, password = params
         if not ssid:
             self.send_response(
                 client, "<p>SSID must be provided!</p><p>Go back and try again!</p>", 400
