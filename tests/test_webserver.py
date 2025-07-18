@@ -49,29 +49,36 @@ def test_run_connection_ok(mock_web_server):
     # connected → reboot
     mock_web_server.manager.wlan_sta.isconnected.side_effect = [True]
 
-    server_socket = Mock()
-    fake_client = Mock()
-    server_socket.accept.return_value = (fake_client, None)
+    mock_client_socket = Mock()
 
-    mock_web_server.run(server_socket)
+    mock_web_server.run(mock_client_socket)
 
     expected_calls = [call(True), call(False)]
     mock_web_server.manager.wlan_ap.active.assert_has_calls(expected_calls)
     mock_web_server.sleep_fn.assert_called_once_with(5)
     mock_web_server.reset_fn.assert_called_once()
-    fake_client.close.assert_not_called()
+    mock_client_socket.close.assert_not_called()
 
 
 def test_run_no_connection_then_ok(mock_web_server):
     # 1st loop: not connected → handle client; 2nd loop: connected → reboot
     mock_web_server.manager.wlan_sta.isconnected.side_effect = [False, True]
 
-    server_socket = Mock()
-    fake_client = Mock()
-    server_socket.accept.return_value = (fake_client, None)
+    mock_client_socket = Mock()
 
-    mock_web_server.run(server_socket)
-    fake_client.close.assert_called_once()
+    parent = Mock()
+    parent.web_server = mock_web_server
+    parent.client_socket = mock_client_socket
+
+    mock_web_server.run(mock_client_socket)
+    expected_calls = [
+        call.client_socket.settimeout(5.0),
+        call.client_socket.recv(128),
+        call.client_socket.close(),
+        # call.web_server.sleep_fn(5),
+        # call.web_server.reset_fn(),
+    ]
+    assert parent.mock_calls == expected_calls
 
 
 # TODO remove

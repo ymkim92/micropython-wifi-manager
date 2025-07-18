@@ -73,7 +73,8 @@ class WifiManager:
     def web_server(self):
         server = WebServer(self, self.logger, time.sleep, machine.reset, debug=False)
         server_socket = self._create_server_socket()
-        server.run(server_socket)
+        client_socket = server_socket.accept()[0]
+        server.run(client_socket)
 
     def _create_server_socket(self):
         """Create and configure the server socket."""

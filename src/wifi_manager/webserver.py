@@ -19,7 +19,6 @@ class WebServer:
         logger: "ConsoleLogger",  # type: ignore
         sleep_fn: callable,
         reset_fn: callable,
-        debug=False,
     ):
         self.manager = manager
         self.logger = logger
@@ -28,7 +27,6 @@ class WebServer:
         self.ap_ssid = manager.ap_ssid
         self.ap_password = manager.ap_password
         self.ap_authmode = manager.ap_authmode
-        self.debug = debug
         self.wifi_credentials = manager.wifi_credentials
         self.sleep_fn = sleep_fn
         self.reset_fn = reset_fn
@@ -45,7 +43,8 @@ class WebServer:
         self.reset_fn()
 
     def _handle_client(self, client):
-        """Handle a single client connection."""
+        """Handle a single client connection.
+        client: socket object representing the client connection (socket.socket)."""
         try:
             client.settimeout(5.0)
             request = b""
@@ -57,8 +56,7 @@ class WebServer:
                 if b"\r\n\r\n" in request:
                     break
 
-            if self.debug:
-                self.logger.debug(f"Received request: {request.decode('utf-8', errors='ignore')}")
+            self.logger.debug(f"Received request: {request.decode('utf-8', errors='ignore')}")
 
             url = parse_request(request)
             if url == "":
@@ -69,15 +67,15 @@ class WebServer:
             else:
                 self.handle_not_found(client)
         except Exception as error:
-            if self.debug:
-                self.logger.debug(f"Error handling client: {error}")
+            self.logger.debug(f"Error handling client: {error}")
         finally:
             client.close()
 
-    def run(self, server_socket):
-        """Start the web server."""
-        if server_socket is None:
-            self.logger.error("Server socket is not created. Cannot run the web server.")
+    def run(self, client_socket):
+        """Start the web server.
+        client_socket: socket object representing the client connection (socket.socket)."""
+        if client_socket is None:
+            self.logger.error("Client socket is not created. Cannot run the web server.")
             return
         self.wlan_ap.active(True)
         self.wlan_ap.config(
@@ -93,8 +91,7 @@ class WebServer:
                 self._reboot_device()
                 return  # just for testing
 
-            client, _ = server_socket.accept()
-            self._handle_client(client)
+            self._handle_client(client_socket)
 
     def send_header(self, client, status_code=200):
         """Send HTTP headers to the client."""
