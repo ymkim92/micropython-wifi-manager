@@ -1,8 +1,3 @@
-# In Python 3.7+, this works:
-from __future__ import annotations
-
-import re
-
 from wifi_manager.network_utils import (
     build_root_form,
     parse_request,

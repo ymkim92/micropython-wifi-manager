@@ -71,25 +71,20 @@ def test_run_no_connection_then_ok(mock_web_server):
     parent.client_socket = mock_client_socket
 
     mock_web_server.run(mock_client_socket)
+
+    # Able to check the order of calls
+    # These are called when not connected
     expected_calls = [
         call.client_socket.settimeout(5.0),
         call.client_socket.recv(128),
         call.client_socket.close(),
-        # call.web_server.sleep_fn(5),
-        # call.web_server.reset_fn(),
     ]
     assert parent.mock_calls == expected_calls
 
-
-# TODO remove
-# def test_reboot_device_true(mock_manager):
-#     mock_logger = Mock()
-#     mock_sleep = Mock()
-#     mock_reset = Mock()
-#     server = WebServer(mock_manager, mock_logger, mock_sleep, mock_reset)
-#     server.reboot = True
-#     server._reboot_device()
-#     mock_sleep.assert_called_once_with(5)
+    # These are called when connected
+    # called in _reboot_device()
+    mock_web_server.sleep_fn.assert_called_once_with(5)
+    mock_web_server.reset_fn.assert_called_once()
 
 
 # def test_reboot_device_false(mock_manager):
